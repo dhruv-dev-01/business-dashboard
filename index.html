@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Analytics</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236C63FF'/><text y='.9em' font-size='70' x='50%' dominant-baseline='auto' text-anchor='middle' font-family='sans-serif' font-weight='900' fill='white'>N</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Chart.js loaded as classic UMD so window.Chart is available to script.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loader" class="loader">
+  <div class="loader-inner">
+    <div class="loader-logo">N</div>
+    <div class="loader-bar"><div class="loader-fill"></div></div>
+    <p class="loader-text">Initializing Nexus Analytics...</p>
+  </div>
+</div>
+
+<!-- App Shell (hidden until auth confirmed) -->
+<div class="app" id="app" style="display:none;">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-icon">N</div>
+        <span class="brand-name">Nexus</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Collapse Sidebar">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i class="fa-solid fa-chart-pie nav-icon"></i><span class="nav-label">Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-page="orders">
+        <i class="fa-solid fa-bag-shopping nav-icon"></i><span class="nav-label">Orders</span>
+        <span class="nav-badge">12</span>
+      </a>
+      <a href="#" class="nav-item" data-page="analytics">
+        <i class="fa-solid fa-chart-line nav-icon"></i><span class="nav-label">Analytics</span>
+      </a>
+      <a href="#" class="nav-item" data-page="customers">
+        <i class="fa-solid fa-users nav-icon"></i><span class="nav-label">Customers</span>
+      </a>
+      <div class="nav-section-label">Settings</div>
+      <a href="#" class="nav-item" data-page="products">
+        <i class="fa-solid fa-box nav-icon"></i><span class="nav-label">Products</span>
+      </a>
+      <a href="#" class="nav-item" data-page="settings">
+        <i class="fa-solid fa-gear nav-icon"></i><span class="nav-label">Settings</span>
+      </a>
+      <a href="#" class="nav-item" data-page="help">
+        <i class="fa-solid fa-circle-question nav-icon"></i><span class="nav-label">Help</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Loading...</div>
+          <div class="user-role">Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main" id="main">
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="mobile-toggle" id="mobileToggle"><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" class="search-input" placeholder="Search anything..." id="globalSearch" />
+          <span class="search-shortcut">⌘K</span>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="nav-actions">
+          <button class="action-btn" id="themeToggle" title="Toggle theme">
+            <i class="fa-solid fa-moon" id="themeIcon"></i>
+          </button>
+          <button class="action-btn" id="notifBtn">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <button class="action-btn">
+            <i class="fa-solid fa-expand"></i>
+          </button>
+        </div>
+        <div class="profile-menu" id="profileMenu">
+          <div class="profile-trigger" id="profileTrigger">
+            <div class="profile-avatar" id="navAvatar">?</div>
+            <div class="profile-info">
+              <span class="profile-name" id="navName">Loading...</span>
+              <span class="profile-sub">Admin</span>
+            </div>
+            <i class="fa-solid fa-chevron-down profile-caret"></i>
+          </div>
+          <div class="profile-dropdown" id="profileDropdown">
+            <a href="#" class="dropdown-item"><i class="fa-solid fa-user"></i> My Profile</a>
+            <a href="#" class="dropdown-item"><i class="fa-solid fa-gear"></i> Account Settings</a>
+            <a href="#" class="dropdown-item"><i class="fa-solid fa-shield"></i> Privacy &amp; Security</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item danger" id="logoutBtn">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Notification Panel -->
+    <div class="notif-panel" id="notifPanel">
+      <div class="notif-header">
+        <span>Notifications</span>
+        <button class="notif-clear">Mark all read</button>
+      </div>
+      <div class="notif-list">
+        <div class="notif-item unread">
+          <div class="notif-icon green"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="notif-body"><strong>Order #1089</strong> was successfully paid.</div>
+          <div class="notif-time">2m ago</div>
+        </div>
+        <div class="notif-item unread">
+          <div class="notif-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="notif-body"><strong>Low stock</strong> alert for Product #34.</div>
+          <div class="notif-time">18m ago</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon blue"><i class="fa-solid fa-user-plus"></i></div>
+          <div class="notif-body"><strong>New customer</strong> registered: Priya Sharma.</div>
+          <div class="notif-time">1h ago</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon purple"><i class="fa-solid fa-chart-bar"></i></div>
+          <div class="notif-body"><strong>Revenue goal</strong> reached for this month.</div>
+          <div class="notif-time">3h ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Content — SPA sections, only one visible at a time -->
+    <div class="content" id="contentArea">
+
+      <!-- ═══════════════════════════════════════
+           DASHBOARD PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section active" data-page="dashboard">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Business Overview</h1>
+            <p class="page-sub" id="welcomeMsg">Welcome back. Here's what's happening today.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="exportBtn"><i class="fa-solid fa-download"></i> Export</button>
+            <button class="btn btn-primary" id="openModalBtn"><i class="fa-solid fa-plus"></i> Add Order</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-label">Total Revenue</div>
+              <div class="kpi-icon-wrap teal"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            </div>
+            <div class="kpi-value" id="kpiRevenue">₹0</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up"><i class="fa-solid fa-arrow-trend-up"></i> 12.4%</span>
+              <span class="kpi-period">vs last month</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="sparkRevenue"></canvas></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-label">Net Profit</div>
+              <div class="kpi-icon-wrap purple"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+            <div class="kpi-value" id="kpiProfit">₹0</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up"><i class="fa-solid fa-arrow-trend-up"></i> 8.1%</span>
+              <span class="kpi-period">vs last month</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="sparkProfit"></canvas></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-label">Total Orders</div>
+              <div class="kpi-icon-wrap orange"><i class="fa-solid fa-bag-shopping"></i></div>
+            </div>
+            <div class="kpi-value" id="kpiOrders">0</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend down"><i class="fa-solid fa-arrow-trend-down"></i> 2.3%</span>
+              <span class="kpi-period">vs last month</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="sparkOrders"></canvas></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-label">Active Customers</div>
+              <div class="kpi-icon-wrap pink"><i class="fa-solid fa-users"></i></div>
+            </div>
+            <div class="kpi-value" id="kpiCustomers">0</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up"><i class="fa-solid fa-arrow-trend-up"></i> 5.7%</span>
+              <span class="kpi-period">vs last month</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="sparkCustomers"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="charts-row">
+          <div class="chart-card wide">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Revenue Over Time</div>
+                <div class="chart-sub">Monthly performance — FY 2024</div>
+              </div>
+              <div class="chart-controls">
+                <button class="chart-btn active" data-range="12">12M</button>
+                <button class="chart-btn" data-range="6">6M</button>
+                <button class="chart-btn" data-range="3">3M</button>
+              </div>
+            </div>
+            <div class="chart-body"><canvas id="revenueChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Category Sales</div><div class="chart-sub">By product category</div></div>
+            </div>
+            <div class="chart-body"><canvas id="categoryChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Profit vs Expense</div><div class="chart-sub">Quarterly breakdown</div></div>
+            </div>
+            <div class="chart-body"><canvas id="profitChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Traffic Sources</div><div class="chart-sub">Acquisition channels</div></div>
+            </div>
+            <div class="chart-body"><canvas id="trafficChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Recent Orders (dashboard preview — top 5) -->
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="chart-title">Recent Orders</div>
+              <div class="chart-sub">Latest 5 orders — <a href="#" id="viewAllOrders" style="color:var(--accent);text-decoration:none">View all</a></div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th><th>Customer</th><th>Product</th>
+                  <th>Amount</th><th>Status</th><th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardOrdersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           ORDERS PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section" data-page="orders">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Orders</h1>
+            <p class="page-sub">Manage and track all customer orders</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="exportBtn2"><i class="fa-solid fa-download"></i> Export</button>
+            <button class="btn btn-primary" id="openModalBtn2"><i class="fa-solid fa-plus"></i> Add Order</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="chart-title">All Orders</div>
+              <div class="chart-sub" id="orderCountLabel">Showing all orders</div>
+            </div>
+            <div class="table-controls">
+              <div class="table-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="tableSearch" placeholder="Search orders..." />
+              </div>
+              <select id="statusFilter" class="filter-select">
+                <option value="">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button class="btn btn-ghost" id="sortBtn">
+                <i class="fa-solid fa-arrow-up-wide-short"></i> Sort
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="ordersTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-col="id">Order ID <i class="fa-solid fa-sort"></i></th>
+                  <th class="sortable" data-col="customer">Customer <i class="fa-solid fa-sort"></i></th>
+                  <th class="sortable" data-col="product">Product <i class="fa-solid fa-sort"></i></th>
+                  <th class="sortable" data-col="amount">Amount <i class="fa-solid fa-sort"></i></th>
+                  <th>Status</th>
+                  <th class="sortable" data-col="date">Date <i class="fa-solid fa-sort"></i></th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="tableInfo">0 orders</span>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           ANALYTICS PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section" data-page="analytics">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Analytics</h1>
+            <p class="page-sub">Detailed performance metrics and trends</p>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-value">₹24.6L</div>
+            <div class="stat-label">Total Revenue (YTD)</div>
+            <span class="stat-change up">↑ 18.2% vs last year</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">1,284</div>
+            <div class="stat-label">Total Conversions</div>
+            <span class="stat-change up">↑ 9.4% vs last year</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">3.8%</div>
+            <div class="stat-label">Avg. Conversion Rate</div>
+            <span class="stat-change down">↓ 0.3% vs last year</span>
+          </div>
+        </div>
+        <div class="analytics-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Monthly Revenue</div><div class="chart-sub">Full year breakdown</div></div>
+            </div>
+            <div class="chart-body"><canvas id="analyticsRevenueChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Order Volume</div><div class="chart-sub">Orders per month</div></div>
+            </div>
+            <div class="chart-body"><canvas id="analyticsOrdersChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Revenue by Category</div><div class="chart-sub">Product mix</div></div>
+            </div>
+            <div class="chart-body"><canvas id="analyticsCategoryChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Customer Growth</div><div class="chart-sub">New customers per month</div></div>
+            </div>
+            <div class="chart-body"><canvas id="analyticsCustomersChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           CUSTOMERS PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section" data-page="customers">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Customers</h1>
+            <p class="page-sub">Active customer accounts and profiles</p>
+          </div>
+        </div>
+        <div class="customers-grid" id="customersGrid">
+          <!-- Populated by JS from orders data -->
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           PRODUCTS PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section" data-page="products">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Products</h1>
+            <p class="page-sub">Product catalogue and inventory</p>
+          </div>
+        </div>
+        <div class="products-grid">
+          <div class="product-card">
+            <div class="product-icon kpi-icon-wrap teal"><i class="fa-solid fa-chart-pie"></i></div>
+            <div class="product-name">Analytics Pro</div>
+            <div class="product-sku">SKU: PRO-001</div>
+            <div class="product-price">₹12,499</div>
+            <div class="product-stock">200 units available</div>
+            <span class="stock-badge ok">In Stock</span>
+          </div>
+          <div class="product-card">
+            <div class="product-icon kpi-icon-wrap purple"><i class="fa-solid fa-building"></i></div>
+            <div class="product-name">Enterprise Suite</div>
+            <div class="product-sku">SKU: ENT-002</div>
+            <div class="product-price">₹49,999</div>
+            <div class="product-stock">45 units available</div>
+            <span class="stock-badge ok">In Stock</span>
+          </div>
+          <div class="product-card">
+            <div class="product-icon kpi-icon-wrap orange"><i class="fa-solid fa-rocket"></i></div>
+            <div class="product-name">Growth Bundle</div>
+            <div class="product-sku">SKU: GRW-003</div>
+            <div class="product-price">₹8,999</div>
+            <div class="product-stock">12 units available</div>
+            <span class="stock-badge low">Low Stock</span>
+          </div>
+          <div class="product-card">
+            <div class="product-icon kpi-icon-wrap pink"><i class="fa-solid fa-box"></i></div>
+            <div class="product-name">Starter Pack</div>
+            <div class="product-sku">SKU: STR-004</div>
+            <div class="product-price">₹3,999</div>
+            <div class="product-stock">340 units available</div>
+            <span class="stock-badge ok">In Stock</span>
+          </div>
+          <div class="product-card">
+            <div class="product-icon kpi-icon-wrap teal"><i class="fa-solid fa-plug"></i></div>
+            <div class="product-name">Add-ons Pack</div>
+            <div class="product-sku">SKU: ADD-005</div>
+            <div class="product-price">₹1,999</div>
+            <div class="product-stock">8 units available</div>
+            <span class="stock-badge low">Low Stock</span>
+          </div>
+          <div class="product-card">
+            <div class="product-icon kpi-icon-wrap purple"><i class="fa-solid fa-headset"></i></div>
+            <div class="product-name">Support Premium</div>
+            <div class="product-sku">SKU: SUP-006</div>
+            <div class="product-price">₹5,999</div>
+            <div class="product-stock">Unlimited</div>
+            <span class="stock-badge ok">Available</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           SETTINGS PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section" data-page="settings">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-sub">Manage your account and preferences</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <div class="settings-card-title"><i class="fa-solid fa-bell" style="color:var(--accent);margin-right:8px"></i>Notifications</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Email Alerts</div><div class="setting-desc">Receive order updates via email</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Push Notifications</div><div class="setting-desc">Browser push alerts</div></div>
+              <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Weekly Reports</div><div class="setting-desc">Summary report every Monday</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Low Stock Alerts</div><div class="setting-desc">Alert when stock drops below 15</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-title"><i class="fa-solid fa-sliders" style="color:var(--accent);margin-right:8px"></i>Preferences</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Dark Mode</div><div class="setting-desc">Use dark theme across the app</div></div>
+              <label class="toggle-switch" id="settingsDarkToggle">
+                <input type="checkbox" id="settingsDarkCheck"><span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Compact Sidebar</div><div class="setting-desc">Always collapse the sidebar</div></div>
+              <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Auto-save Orders</div><div class="setting-desc">Save drafts automatically</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Two-factor Auth</div><div class="setting-desc">Extra security for your account</div></div>
+              <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-title"><i class="fa-solid fa-user" style="color:var(--accent);margin-right:8px"></i>Account</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Display Name</div><div class="setting-desc" id="settingsName">Loading...</div></div>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:0.78rem">Edit</button>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Email</div><div class="setting-desc" id="settingsEmail">Loading...</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Password</div><div class="setting-desc">Last changed: Never</div></div>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:0.78rem">Change</button>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Delete Account</div><div class="setting-desc" style="color:var(--accent-3)">Permanently remove account</div></div>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:0.78rem;color:var(--accent-3)">Delete</button>
+            </div>
+          </div>
+          <div class="settings-card">
+            <div class="settings-card-title"><i class="fa-solid fa-shield" style="color:var(--accent);margin-right:8px"></i>Privacy & Security</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Activity Logging</div><div class="setting-desc">Log all admin actions</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Data Export</div><div class="setting-desc">Allow CSV data exports</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Session Timeout</div><div class="setting-desc">Auto logout after 30 mins</div></div>
+              <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           HELP PAGE
+           ═══════════════════════════════════════ -->
+      <section class="page-section" data-page="help">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Help & Support</h1>
+            <p class="page-sub">Documentation, FAQs, and contact options</p>
+          </div>
+        </div>
+        <div class="help-grid">
+          <div class="help-card">
+            <div class="help-card-title"><i class="fa-solid fa-circle-question" style="color:var(--accent);margin-right:8px"></i>Frequently Asked Questions</div>
+            <div class="faq-item">
+              <div class="faq-q">How do I add a new order? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="faq-a">Click the "+ Add Order" button in the top right of the Dashboard or Orders page. Fill in customer name, product, amount, status and date, then click Save Order.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">How do I export my data? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="faq-a">Click the "Export" button on the Dashboard or Orders page. A CSV file containing all your orders will be downloaded automatically.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">How do I delete an order? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="faq-a">Go to the Orders page, find the order you want to remove, and click the red trash icon in the Actions column. You will be asked to confirm before deletion.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">Is my data safe? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="faq-a">Yes. All data is stored in Firebase Firestore with authentication required. Only you can access your data — each account has its own isolated data collection.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">How do I switch to light mode? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="faq-a">Click the moon/sun icon in the top navigation bar, or use the Dark Mode toggle in Settings → Preferences.</div>
+            </div>
+          </div>
+          <div class="help-card">
+            <div class="help-card-title"><i class="fa-solid fa-headset" style="color:var(--accent);margin-right:8px"></i>Contact Support</div>
+            <div class="contact-item"><i class="fa-solid fa-envelope"></i> support@nexusanalytics.io</div>
+            <div class="contact-item"><i class="fa-solid fa-phone"></i> +91 98765 43210</div>
+            <div class="contact-item"><i class="fa-brands fa-slack"></i> nexus-support.slack.com</div>
+            <div class="contact-item"><i class="fa-solid fa-clock"></i> Mon–Fri, 9 AM – 6 PM IST</div>
+            <br/>
+            <div class="help-card-title" style="margin-top:8px"><i class="fa-solid fa-book" style="color:var(--accent);margin-right:8px"></i>Quick Links</div>
+            <div class="contact-item"><i class="fa-solid fa-file-lines"></i> Documentation</div>
+            <div class="contact-item"><i class="fa-solid fa-code"></i> API Reference</div>
+            <div class="contact-item"><i class="fa-brands fa-github"></i> GitHub Repository</div>
+            <div class="contact-item"><i class="fa-solid fa-video"></i> Video Tutorials</div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Add Order Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Add New Order</h2>
+      <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Customer Name <span class="req">*</span></label>
+          <input type="text" id="formCustomer" class="form-input" placeholder="e.g. Rahul Gupta" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Name <span class="req">*</span></label>
+          <input type="text" id="formProduct" class="form-input" placeholder="e.g. Analytics Pro" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (₹) <span class="req">*</span></label>
+          <input type="number" id="formAmount" class="form-input" placeholder="e.g. 4999" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status <span class="req">*</span></label>
+          <select id="formStatus" class="form-input">
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Date</label>
+          <input type="date" id="formDate" class="form-input" />
+        </div>
+      </div>
+      <div id="formError" class="form-error hidden">Please fill all required fields.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelModal">Cancel</button>
+      <button class="btn btn-primary" id="submitOrder"><i class="fa-solid fa-check"></i> Save Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i class="fa-solid fa-circle-check toast-icon"></i>
+  <span id="toastMsg">Order added successfully!</span>
+</div>
+
+<!-- Single module entry point — all logic in script.js -->
+<script type="module" src="script.js"></script>
+</body>
+</html>

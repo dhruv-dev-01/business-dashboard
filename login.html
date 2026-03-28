@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Analytics — Sign In</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236C63FF'/><text y='.9em' font-size='70' x='50%' dominant-baseline='auto' text-anchor='middle' font-family='sans-serif' font-weight='900' fill='white'>N</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .auth-wrap { width:100%; max-width:420px; padding:20px; }
+    .auth-logo { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:36px; }
+    .auth-logo .brand-icon {
+      width:44px; height:44px; border-radius:13px; font-size:22px;
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-weight:800; color:#fff;
+    }
+    .auth-logo .brand-name { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:700; color:var(--text); }
+    .auth-card { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-lg); }
+    .auth-tabs { display:flex; gap:4px; background:var(--surface); border-radius:var(--radius-sm); padding:4px; margin-bottom:28px; }
+    .auth-tab { flex:1; padding:9px; border:none; background:none; border-radius:7px; font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:600; color:var(--text-2); cursor:pointer; transition:all var(--transition); }
+    .auth-tab.active { background:var(--bg-2); color:var(--text); box-shadow:var(--shadow-sm); }
+    .auth-panel { display:none; }
+    .auth-panel.active { display:block; }
+    .auth-title { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+    .auth-sub { font-size:0.83rem; color:var(--text-2); margin-bottom:22px; }
+    .auth-form .form-group { margin-bottom:16px; }
+    .auth-form .form-label { display:block; margin-bottom:6px; }
+    .auth-form .form-input { width:100%; }
+    .auth-form .btn { width:100%; justify-content:center; margin-top:6px; padding:12px; font-size:0.92rem; }
+    .auth-error { background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.25); color:var(--accent-3); border-radius:var(--radius-sm); padding:10px 14px; font-size:0.82rem; margin-top:12px; }
+    .auth-success { background:rgba(0,212,170,0.1); border:1px solid rgba(0,212,170,0.25); color:var(--accent-2); border-radius:var(--radius-sm); padding:10px 14px; font-size:0.82rem; margin-top:12px; }
+    .input-wrap { position:relative; }
+    .input-wrap .form-input { padding-right:42px; }
+    .toggle-pass { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-3); cursor:pointer; font-size:0.85rem; }
+    .auth-footer { text-align:center; margin-top:20px; font-size:0.8rem; color:var(--text-3); }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-logo">
+    <div class="brand-icon">N</div>
+    <span class="brand-name">Nexus</span>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin">Sign In</button>
+      <button class="auth-tab" id="tabRegister">Register</button>
+    </div>
+
+    <!-- Login Panel -->
+    <div class="auth-panel active" id="panelLogin">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to your Nexus Analytics account</div>
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="toggle-pass" data-target="loginPassword"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+        </button>
+        <div id="loginError" class="auth-error" style="display:none;"></div>
+      </form>
+    </div>
+
+    <!-- Register Panel -->
+    <div class="auth-panel" id="panelRegister">
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Set up your free Nexus Analytics account</div>
+      <form class="auth-form" id="registerForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input type="text" id="regName" class="form-input" placeholder="Alex Kumar" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 characters" autocomplete="new-password" />
+            <button type="button" class="toggle-pass" data-target="regPassword"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="registerBtn">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+        <div id="registerMsg" style="display:none; margin-top:12px; padding:10px 14px; border-radius:var(--radius-sm); font-size:0.82rem;"></div>
+      </form>
+    </div>
+  </div>
+  <div class="auth-footer">&copy; 2024 Nexus Analytics</div>
+</div>
+
+<script type="module">
+  console.log('[login.js] Script loaded');
+
+  // Single import block — firebase.js is the ONLY place initializeApp is called.
+  // The browser's ES module cache ensures firebase.js only executes once even if
+  // both login.html and index.html import it during the same session.
+  import { auth } from './firebase.js';
+  import {
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // ── If already signed in, skip login page entirely ──────────────
+  // onAuthStateChanged fires once immediately with the current user (or null).
+  // We only redirect on a confirmed authenticated user — not on null.
+  onAuthStateChanged(auth, (user) => {
+    console.log('[login.js] onAuthStateChanged:', user ? user.email : 'not signed in');
+    if (user) {
+      console.log('[login.js] Already authenticated → redirecting to index.html');
+      window.location.replace('index.html');
+    }
+    // If user is null, do nothing — stay on login page
+  });
+
+  // ── Tab switching ────────────────────────────────────────────────
+  document.getElementById('tabLogin').addEventListener('click', () => {
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabRegister').classList.remove('active');
+    document.getElementById('panelLogin').classList.add('active');
+    document.getElementById('panelRegister').classList.remove('active');
+  });
+  document.getElementById('tabRegister').addEventListener('click', () => {
+    document.getElementById('tabRegister').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+    document.getElementById('panelRegister').classList.add('active');
+    document.getElementById('panelLogin').classList.remove('active');
+  });
+
+  // ── Password toggle ──────────────────────────────────────────────
+  document.querySelectorAll('.toggle-pass').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp  = document.getElementById(btn.dataset.target);
+      const show = inp.type === 'password';
+      inp.type   = show ? 'text' : 'password';
+      btn.querySelector('i').className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    });
+  });
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  function showLoginError(msg) {
+    const el = document.getElementById('loginError');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideLoginError() {
+    document.getElementById('loginError').style.display = 'none';
+  }
+  function showRegisterMsg(msg, isError) {
+    const el = document.getElementById('registerMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background    = isError ? 'rgba(255,107,107,0.1)' : 'rgba(0,212,170,0.1)';
+    el.style.border        = isError ? '1px solid rgba(255,107,107,0.25)' : '1px solid rgba(0,212,170,0.25)';
+    el.style.color         = isError ? 'var(--accent-3)' : 'var(--accent-2)';
+  }
+  function hideRegisterMsg() {
+    document.getElementById('registerMsg').style.display = 'none';
+  }
+  function setLoading(btnId, loading, originalHTML) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.style.opacity = loading ? '0.7' : '1';
+    btn.style.pointerEvents = loading ? 'none' : '';
+    btn.innerHTML = loading
+      ? '<i class="fa-solid fa-spinner" style="animation:spin .8s linear infinite;display:inline-block"></i> Please wait...'
+      : originalHTML;
+  }
+  function friendlyError(code) {
+    const map = {
+      'auth/user-not-found':         'No account with this email exists.',
+      'auth/wrong-password':         'Incorrect password.',
+      'auth/invalid-credential':     'Invalid email or password.',
+      'auth/email-already-in-use':   'An account with this email already exists.',
+      'auth/invalid-email':          'Please enter a valid email address.',
+      'auth/weak-password':          'Password must be at least 6 characters.',
+      'auth/too-many-requests':      'Too many attempts. Try again later.',
+      'auth/network-request-failed': 'Network error. Check your connection.',
+      'auth/operation-not-allowed':  'Email/password sign-in is not enabled in Firebase Console.',
+    };
+    return map[code] || 'Error: ' + (code || 'unknown');
+  }
+
+  // ── LOGIN ────────────────────────────────────────────────────────
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log('[login.js] Login form submitted');
+
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    hideLoginError();
+
+    if (!email || !password) {
+      showLoginError('Please fill in all fields.'); return;
+    }
+
+    setLoading('loginBtn', true, '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In');
+    try {
+      console.log('[login.js] Attempting sign in...');
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log('[login.js] Sign in successful — onAuthStateChanged will redirect');
+      // Do NOT reset button — redirect is about to happen via onAuthStateChanged
+    } catch (err) {
+      console.error('[login.js] Login error:', err.code);
+      showLoginError(friendlyError(err.code));
+      setLoading('loginBtn', false, '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In');
+    }
+  });
+
+  // ── REGISTER ─────────────────────────────────────────────────────
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log('[login.js] Register form submitted');
+
+    const name     = document.getElementById('regName').value.trim();
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    hideRegisterMsg();
+
+    // Validation
+    if (!name)              { showRegisterMsg('Please enter your full name.', true); return; }
+    if (!email)             { showRegisterMsg('Please enter your email.', true); return; }
+    if (password.length < 6){ showRegisterMsg('Password must be at least 6 characters.', true); return; }
+
+    setLoading('registerBtn', true, '<i class="fa-solid fa-user-plus"></i> Create Account');
+
+    try {
+      console.log('[login.js] Creating account for:', email);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('[login.js] Account created:', cred.user.uid);
+
+      // Update display name — non-fatal if this fails
+      try {
+        await updateProfile(cred.user, { displayName: name });
+        console.log('[login.js] Display name set:', name);
+      } catch (profileErr) {
+        console.warn('[login.js] updateProfile failed (non-fatal):', profileErr.message);
+      }
+
+      // Registration succeeded.
+      // onAuthStateChanged above will fire automatically with the new user
+      // and call window.location.replace('index.html').
+      // We show a success message in case the redirect takes a moment.
+      showRegisterMsg('Account created! Redirecting...', false);
+      console.log('[login.js] Registration done — waiting for auth redirect');
+
+    } catch (err) {
+      console.error('[login.js] Registration error:', err.code, err.message);
+      showRegisterMsg(friendlyError(err.code), true);
+      // Always reset button on error
+      setLoading('registerBtn', false, '<i class="fa-solid fa-user-plus"></i> Create Account');
+    }
+    // NOTE: We do NOT reset the button on success — the redirect will navigate away.
+    // If for any reason the redirect is delayed, the button stays disabled to prevent
+    // double-submit. The success message above reassures the user.
+  });
+
+  console.log('[login.js] All listeners attached — ready');
+</script>
+</body>
+</html>
